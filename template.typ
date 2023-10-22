@@ -149,7 +149,7 @@
       text("作者签名：██████████年███月███日")
     }
   ]
-  
+
   v(6em)
   align(center)[
     #text(font: heiti, size: 18pt)[
@@ -163,7 +163,7 @@
     ] else [
       本学位论文作者完全了解学校有关保障、使用学位论文的规定，同意学校保留并向有关学位论文管理部门或机构送交论文的复印件和电子版，允许论文被查阅和借阅。本人授权█████████████将本学位论文的全部或部分内容编入有关数据进行检索，可以采用影印、缩印或扫描等复制手段保存和汇编本学位论文。
     ]
-    
+
 
     学位论文属于 1、保密 □，在#h(3em)年解密后适用本授权书。
 
@@ -214,7 +214,7 @@
     "致　　谢"
   } + empty_par()
 
-  
+
   [= 致谢 <_thx>]
 
   body
@@ -256,7 +256,7 @@
   abstract
   par(first-line-indent: 0em)[
     #text(weight: "bold", font: heiti, size: 12pt)[
-      Key Words: 
+      Key Words:
       #keywords.join("; ")
     ]
   ]
@@ -342,7 +342,7 @@
       grid(
         columns: (20fr, 1fr),
         it.body,
-        align(center + horizon, 
+        align(center + horizon,
           it.counter.display(it.numbering)
         )
       )
@@ -381,7 +381,7 @@
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[本科生毕业设计(论文)]
+    )[函数式编程原理\ 课程报告]
 
     #v(40pt)
 
@@ -408,11 +408,11 @@
         )[
           #body
         ]
-      ) 
+      )
     }
-    
+
     #let info_key(body) = {
-      rect(width: 100%, inset: 2pt, 
+      rect(width: 100%, inset: 2pt,
        stroke: none,
        text(
         font: zhongsong,
@@ -462,7 +462,7 @@
       } else {
         [█████████████████████████]
       }
-      
+
       line(length: 100%, stroke: 0.7pt)
     }
   )
@@ -472,11 +472,11 @@
   set page(
     footer: {
       set align(center)
-      
+
       grid(
         columns: (5fr, 1fr, 5fr),
         line(length: 100%, stroke: 0.7pt),
-        text(font: songti, 10pt, baseline: -3pt, 
+        text(font: songti, 10pt, baseline: -3pt,
           counter(page).display("I")
         ),
         line(length: 100%, stroke: 0.7pt)
@@ -527,15 +527,15 @@
   chinese_outline()
 
   // 正文的页脚
-  
+
   set page(
     footer: {
       set align(center)
-      
+
       grid(
         columns: (5fr, 1fr, 5fr),
         line(length: 100%, stroke: 0.7pt),
-        text(font: songti, 10pt, baseline: -3pt, 
+        text(font: songti, 10pt, baseline: -3pt,
           counter(page).display("1")
         ),
         line(length: 100%, stroke: 0.7pt)

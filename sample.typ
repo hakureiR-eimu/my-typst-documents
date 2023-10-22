@@ -2,25 +2,25 @@
 
 #show: project.with(
   anony: false,
-  title: "基于 ChatGPT 的狗屁通文章生成器",
-  author: "作者",
+  title: " ",
+  author: "张钧玮",
   abstract_zh: [
   先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。然侍卫之臣不懈于内，忠志之士忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，恢弘志士之气，不宜妄自菲薄，引喻失义，以塞忠谏之路也。
 
   宫中府中，俱为一体；陟罚臧否，不宜异同。若有作奸犯科及为忠善者，宜付有司论其刑赏，以昭陛下平明之理，不宜偏私，使内外异法也。
   ],
   abstract_en: [
-  The founding emperor passed away before his endeavor was half completed, and now the empire is divided into three parts. Yizhou is exhausted and in decline, and this is truly a critical moment of survival or destruction. However, the palace guards are tirelessly serving within, and loyal subjects are sacrificing themselves outside, all in order to repay the late emperor's kindness and show loyalty to the current emperor. It is appropriate to listen to wise advice, to honor the late emperor's virtues, to inspire the courage of loyal subjects, and not to belittle oneself or distort the truth, in order to keep the path of loyal counsel open. 
+  The founding emperor passed away before his endeavor was half completed, and now the empire is divided into three parts. Yizhou is exhausted and in decline, and this is truly a critical moment of survival or destruction. However, the palace guards are tirelessly serving within, and loyal subjects are sacrificing themselves outside, all in order to repay the late emperor's kindness and show loyalty to the current emperor. It is appropriate to listen to wise advice, to honor the late emperor's virtues, to inspire the courage of loyal subjects, and not to belittle oneself or distort the truth, in order to keep the path of loyal counsel open.
 
   The palace and government are one entity, and punishments should be consistent. If there are those who commit crimes or show loyalty and virtue, they should be judged by the legal system to demonstrate your fairness as emperor, rather than showing partiality that would create different laws for those inside and outside the palace.
   ],
   keywords_zh: ("关键词1", "关键词2", "关键词3"),
   keywords_en: ("Keyword 1", "Keyword 2", "Keyword 3"),
-  school: "复制粘贴写报告学院",
-  id: "U000114514",
-  mentor: "你的老板",
-  class: "XXXX 专业 0000 班",
-  date: (1926, 8, 17)
+  school: "计算机学院",
+  id: "U202115520",
+  mentor: "顾琳",
+  class: "大数据 专业 2102 班",
+  date: (2023, 10, 22)
 )
 
 
@@ -274,7 +274,7 @@ a4纸，上下空2.5cm，左右空3cm
 
 #pagebreak()
 #acknowledgement()[
-  
+
 完成本篇论文之际，我要向许多人表达我的感激之情。
 
 首先，我要感谢我的指导教师，他/她对本文提供的宝贵建议和指导。所有这些支持和指导都是无私的，而且让我受益匪浅。
@@ -297,7 +297,7 @@ a4纸，上下空2.5cm，左右空3cm
 //   set heading(level: 1, numbering: none)
 
 //   set par(justify: false, leading: 1.24em, first-line-indent: 2em)
-  
+
 //   show bibliography: it => {
 //     [= 参考文献]
 //     let bib = yaml("./bibitems.yaml")
