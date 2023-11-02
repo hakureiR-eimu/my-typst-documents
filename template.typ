@@ -190,15 +190,6 @@
   ]
 }
 
-// 参考文献
-#let references(path) = {
-  // 这个取消目录里的 numbering
-  set heading(level: 1, numbering: none)
-
-  set par(justify: false, leading: 1.24em, first-line-indent: 2em)
-
-  bibliography(path, title:"参考文献")
-}
 
 
 // 致谢，请手动调用
@@ -221,46 +212,46 @@
 }
 
 // 中文摘要
-#let zh_abstract_page(abstract, keywords: ()) = {
-  set heading(level: 1, numbering: none)
-  show <_zh_abstract_>: {
-    align(center)[
-      #text(font: heiti, size: 18pt, "摘　　要")
-    ]
-  }
-  [= 摘要 <_zh_abstract_>]
+//#let zh_abstract_page(abstract, keywords: ()) = {
+//  set heading(level: 1, numbering: none)
+//  show <_zh_abstract_>: {
+//    align(center)[
+//      #text(font: heiti, size: 18pt, "摘　　要")
+//    ]
+//  }
+//  [= 摘要 <_zh_abstract_>]
+//
+//  set text(font: songti, size: 12pt)
+//
+//  abstract
+//  par(first-line-indent: 0em)[
+//    #text(weight: "bold", font: heiti, size: 12pt)[
+//      关键词：
+//      #keywords.join("；")
+//    ]
+//  ]
+//}
 
-  set text(font: songti, size: 12pt)
-
-  abstract
-  par(first-line-indent: 0em)[
-    #text(weight: "bold", font: heiti, size: 12pt)[
-      关键词：
-      #keywords.join("；")
-    ]
-  ]
-}
-
-// 英文摘要
-#let en_abstract_page(abstract, keywords: ()) = {
-  set heading(level: 1, numbering: none)
-  show <_en_abstract_>: {
-    align(center)[
-      #text(font: heiti, size: 18pt, "Abstract")
-    ]
-  }
-  [= Abstract <_en_abstract_>]
-
-  set text(font: songti, size: 12pt)
-
-  abstract
-  par(first-line-indent: 0em)[
-    #text(weight: "bold", font: heiti, size: 12pt)[
-      Key Words:
-      #keywords.join("; ")
-    ]
-  ]
-}
+//// 英文摘要
+//#let en_abstract_page(abstract, keywords: ()) = {
+//  set heading(level: 1, numbering: none)
+//  show <_en_abstract_>: {
+//    align(center)[
+//      #text(font: heiti, size: 18pt, "Abstract")
+//    ]
+//  }
+//  [= Abstract <_en_abstract_>]
+//
+//  set text(font: songti, size: 12pt)
+//
+//  abstract
+//  par(first-line-indent: 0em)[
+//    #text(weight: "bold", font: heiti, size: 12pt)[
+//      Key Words:
+//      #keywords.join("; ")
+//    ]
+//  ]
+//}
 
 #let project(
   anony: false, // 是否匿名化处理
@@ -392,7 +383,7 @@
       #title
     ]
 
-    #v(100pt)
+    #v(40pt)
 
     #let info_value(body) = {
       rect(
@@ -447,9 +438,6 @@
     #pagebreak()
   ]
 
-  // 原创性声明
-  declaration(anony: anony)
-  pagebreak()
 
   counter(page).update(0)
   // 页眉
@@ -458,7 +446,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anony {
-        [华 中 科 技 大 学 毕 业 设 计 (论 文)]
+        [函数式编程课程报告]
       } else {
         [█████████████████████████]
       }
@@ -510,18 +498,18 @@
     it
   } + empty_par()
 
-  pagebreak()
+  //pagebreak()
   counter(page).update(1)
 
   // 摘要
-  zh_abstract_page(abstract_zh, keywords: keywords_zh)
+  //zh_abstract_page(abstract_zh, keywords: keywords_zh)
 
-  pagebreak()
+  //pagebreak()
 
   // abstract
-  en_abstract_page(abstract_en, keywords: keywords_en)
+  //en_abstract_page(abstract_en, keywords: keywords_en)
 
-  pagebreak()
+  //pagebreak()
 
   // 目录
   chinese_outline()
