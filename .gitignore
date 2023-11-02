@@ -3,3 +3,5 @@
 template.pdf
 sample.pdf
 tmp
+*.doc
+*.docx
