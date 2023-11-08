@@ -374,7 +374,7 @@
       weight: "bold"
     )[大数据管理\ 课程报告]
 
-    #v(30pt)
+    #v(10pt)
 
     #text(
       font: heiti,
@@ -383,7 +383,7 @@
       #title
     ]
 
-    #v(30pt)
+    #v(10pt)
 
     #let info_value(body) = {
       rect(
@@ -428,6 +428,15 @@
       info_value(if not anony { mentor } else { "██████████" }),
     )
 
+    #v(40pt)
+    #align(right)[
+      #table(
+        columns: (1fr,auto,auto),
+        inset:10pt,
+        [分数],[],
+        [教师签名],[]
+      )
+    ]
     #v(40pt)
     #text(
       font: zhongsong,
