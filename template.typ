@@ -428,16 +428,16 @@
       info_value(if not anony { mentor } else { "██████████" }),
     )
 
-    #v(40pt)
+    #v(20pt)
     #align(right)[
       #table(
-        columns: (1fr,auto,auto),
-        inset:10pt,
-        [分数],[],
-        [教师签名],[]
+        align: center,
+
+        [分数]," ",
+        [教师签名]," ",
       )
     ]
-    #v(40pt)
+    #v(30pt)
     #text(
       font: zhongsong,
       size: 16pt,
