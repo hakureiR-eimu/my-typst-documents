@@ -366,15 +366,15 @@
     }
     #image(logo_path, width: 55%, height: 7%)
 
-    #v(50pt)
+    #v(30pt)
 
     #text(
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[函数式编程原理\ 课程报告]
+    )[大数据管理\ 课程报告]
 
-    #v(40pt)
+    #v(30pt)
 
     #text(
       font: heiti,
@@ -383,7 +383,7 @@
       #title
     ]
 
-    #v(40pt)
+    #v(30pt)
 
     #let info_value(body) = {
       rect(
@@ -446,7 +446,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anony {
-        [函数式编程课程报告]
+        [大数据管理课程报告]
       } else {
         [█████████████████████████]
       }
