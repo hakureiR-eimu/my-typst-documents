@@ -437,7 +437,7 @@
         [教师签名]," ",
       )
     ]
-    #v(30pt)
+    #v(20pt)
     #text(
       font: zhongsong,
       size: 16pt,

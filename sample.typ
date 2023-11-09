@@ -77,12 +77,12 @@ SwapDown: tree -> tree
 
 
 #pagebreak()
-= 实验任务二  (MongoDB实验)
+= 实验任务二  ( MongoDB 实验)
 == 任务要求
 == 完成过程
 == 任务小结
 #pagebreak()
-= 实验任务三  (Neo4j实验)
+= 实验任务三  ( Neo4j 实验)
 == 任务要求
 == 完成过程
 == 任务小结
@@ -93,7 +93,7 @@ SwapDown: tree -> tree
 == 任务小结
 #pagebreak()
 
-= 实验任务五(不同类型数据库MVCC多版本并发控制对比实验)
+= 实验任务五(不同类型数据库 MVCC 多版本并发控制对比实验)
 == 任务要求
 == 完成过程
 == 任务小结
