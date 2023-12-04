@@ -68,8 +68,8 @@
     img,
     caption: caption,
     supplement: [图],
-    numbering: image_num,
-    kind: "image",
+    // numbering: image_num,
+    // kind: "image",
   )
 }
 
