@@ -48,6 +48,7 @@
 == 完成过程
 
 配置mysql环境以及导入数据库的过程不再赘述。以下是代码以及思路：
+
 #sourcecode[```sql
 SELECT  u.user_id,
         b.business_id,
@@ -77,7 +78,10 @@ JOIN (
 JOIN user u ON ut.user_id = u.user_id;
 ```]
 
-使用聚合查找首先找到tip表中被提建议最多的商家ID，提出建议最多的用户ID，将这两个表连接以后使用JSON_MERGE_PATCH 函数将商户信息和用户信息合并为一个 JSON 文档。
+
+使用聚合查找首先找到tip表中被提建议最多的商家ID，
+然后找出提出建议最多的用户ID，
+将这两个表连接以后使用JSON_MERGE_PATCH 函数将商户信息和用户信息合并为一个 JSON 文档。
 
 这里使用的JSON_MERGE_PATCH 使用函数是用于合并两个 JSON 对象的 MySQL 函数。它接受两个 JSON 参数，并返回一个新的 JSON 对象，其中包含了两个输入对象的合并结果。完美符合了题目的需求
 
@@ -89,11 +93,14 @@ JOIN user u ON ut.user_id = u.user_id;
 )<img1>
 
 经过结果参考表可知，结果正确。
-#pagebreak()
 
 #pagebreak()
 = 实验任务二  ( MongoDB 实验)
 == 任务要求
+
+在华为云远程服务器上配置MongoDB环境，导入数据集，完成诸个实验任务。由于页数要求，挑选典型题目：题目 12 作为叙述对象。题目详细要求如下：
+
+在 Subreview 集合中统计评价中 useful、funny 和 cool 都大于 6 的商家返回商家 id 及平均打星，并按商家 id 降序排列。
 == 完成过程
 == 任务小结
 #pagebreak()
