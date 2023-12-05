@@ -151,7 +151,7 @@ mysql的business表有两个个属性分别是business_id，business_info。后�
 经过结果参考表可知，结果正确。但是我发现保存下来的是错误的图片，服务器又钱花完已经释放掉了，图片仅供参考。
 #img(
     image("assets\image-20231019201931204.png"),
-    caption: "JSON_MERGE_PATCH 函数的使用"
+    caption: "Mysql-Json复杂查询"
 )<img1>
 #pagebreak()
 = 实验任务二  ( MongoDB 实验)
