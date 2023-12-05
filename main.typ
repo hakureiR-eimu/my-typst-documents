@@ -1,4 +1,5 @@
 #import "template.typ": *
+#import "@preview/codelst:2.0.0": sourcecode
 
 #show: project.with(
   anony: false,
@@ -6,9 +7,9 @@
   author: "张钧玮          马耀辉         夏彦文",
   school: "计算机学院",
   group:"OmegaXYZ",
-  id: "U202115520   U2021114514   U202115317",
+  id: "U202115520   U202115638   U202115317",
   mentor: "潘鹏",
-  class: "大数据 2102 班",
+  class: "大数据 2101 班    大数据2102班",
   date: (2023, 11, 30)
 )
 
@@ -38,40 +39,34 @@
 //
 //#pagebreak()
 
-= 课程任务概述
+= 任务书
+=== 总体要求
+1. 综合运用软件工程的思想，协同完成一个软件项目的开发，掌软件工程相关的技术和方法；
+2. 组成小组进行选题，通过调研完成项目的需求分析，并详细说明小组成员的分工、项目的时间管理等方面。
+3. 根据需求分析进行总体设计、详细设计、编码与测试等。
+=== 基本内容
+1. 综合运用软件工程的思想，协同完成一个软件项目的开发，掌软件工程相关的技术和方法；
+2. 组成小组进行选题，通过调研完成项目的需求分析，并详细说明小组成员的分工、项目的时间管理等方面。
+3. 根据需求分析进行总体设计、详细设计、编码与测试等。
 
-在云平台部署图数据库 Neo4j ，关系数据库 MySQL ，文档数据库 MongoDB ，完成对应数据集的导入和初始化，然后根据课程任务编写一系列增删改查的任务，关注不同数据库的使用体验和性能差异以及在不同场景下的适用性。
+
+
+
 
 #pagebreak()
 
-= 实验任务一 （Mysql for Json实验）
-== 任务要求
+= 问题定义
+== 项目背景与意义
 
-在华为云服务器上安装 MySQL 并且导入 test 数据库
-== 完成过程
 
-在华为云服务器上安装 MySQL 并且导入 test 数据库。
-== 任务小结
+== 项目基本目标
 
-`
-编写函数treecompare, SwapDown 和heapify：
-`
-
-`
-treecompare: tree * tree -> order
-(* when given two trees, returns a value of type order, based on which tree has a larger value at the root node *)
-
-`
-
-`
-SwapDown: tree -> tree
-(* REQUIRES the subtrees of t are both minheaps )
-( ENSURES swapDown(t) = if t is Empty or all of t’s immediate children are empty then * just return t, otherwise returns a minheap which contains exactly the elements in t. *)
-
-`
+== 可行性分析
 
 
 
+
+== 人员管理和项目进度管理
 
 #pagebreak()
 
@@ -80,28 +75,48 @@ SwapDown: tree -> tree
 
 
 #pagebreak()
-= 实验任务二  ( MongoDB 实验)
-== 任务要求
-== 完成过程
-== 任务小结
+= 需求分析
+== 后端
+===  需求分析概述
+=== UML相关需求分析图
+=== 原型系统设计
 #pagebreak()
-= 实验任务三  ( Neo4j 实验)
-== 任务要求
-== 完成过程
-== 任务小结
+= 概要设计和详细设计
+== 后端
+=== 系统结构
+=== 类图等
+=== 关键数据结构定义
+#sourcecode[```typ
+#show "ArtosFlow": name => box[
+  #box(image(
+    "logo.svg",
+    height: 0.7em,
+  ))
+  #name
+]
+
+This report is embedded in the
+ArtosFlow project. ArtosFlow is a
+project of the Artos Institute.
+```]
+
+== 数据管理说明
 #pagebreak()
-= 实验任务四 (多数据库交互应用实验)
-== 任务要求
-== 完成过程
-== 任务小结
+= 实现与测试
+== 关键函数说明
+== 测试计划和测试用例
+== 结果分析
 #pagebreak()
 
-= 实验任务五(不同类型数据库 MVCC 多版本并发控制对比实验)
-== 任务要求
-== 完成过程
-== 任务小结
+= 总结
+== 用户反馈
+== 全文总结
+
 #pagebreak()
 
-= 课程总结
-#indent() //由于华科使用自创引用格式，基本上为 GB/T 7714 去掉[J]、[C]、[M] 等。所以需要用 show rule 来自定义格式，原理为读取自定义的 bibitems.
-//yaml 文件再一项项渲染出来，因此要求自己维护顺序，使用时请取消 \#references() 前的注释。
+= 体会
+// #indent() //由于华科使用自创引用格式，基本上为 GB/T 7714 去掉[J]、[C]、[M] 等。所以需要用 show rule 来自定义格式，原理为读取自定义的 bibitems.
+// //yaml 文件再一项项渲染出来，因此要求自己维护顺序，使用时请取消 \#references() 前的注释。
+#pagebreak()
+
+= 附录
