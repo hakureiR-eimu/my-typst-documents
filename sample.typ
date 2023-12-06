@@ -243,15 +243,152 @@ RETURN friendsList,number0fFoFs
 #pagebreak()
 = 实验任务四 (多数据库交互应用实验)
 == 任务要求
+
+多数据库交互应用实验具体就是使用neo4j，mongoDB执行依次的任务，前者的输入是后者的输出，通过这个实验可以体会到不同数据库的优势和适用范围。题目2的输入是题目1的输出，因此下面将是题目1和题目2两个实验共同完成。以下是具体的题目要求：
+
+题目1：使用 Neo4j 查找：找出评论过超过 5 家不同商户的用户，并在 Neo4j 以表格形式输出满足以上条件的每个用户的信息：name, funny, fans。
+题目2：将 1 得到的结果导入 MongoDB，并使用该表格数据，统计其中所有出现的
+用户名及该用户名对应的出现次数，并按照出现次数降序排序,使用 aggregate
+实现
 == 完成过程
+
+首先依次给出题目1和题目2的代码：
+#sourcecode(```cypher
+MATCH (user:UserNode)-[:Review]->(review:ReviewNode)-[:Reviewed]->(business:BusinessNode)
+WITH user,count(distinct(business)) AS reviewCount
+WHERE reviewCount > 5
+RETURN user.name,user.funny,user.fans
+```)题目1
+#sourcecode(```MongoDB
+ mongoimport --db Mydb --collection collection41 --file ~/resulttask4/records2.json --jsonArray
+```)命令行代码，以上为一行命令
+#sourcecode(```MongoDB
+
+use('Mydb');
+
+db.collection43.aggregate([
+    { $group: { _id: '$name', count: { $sum: 1 } } },
+    { $sort: { count: -1 } }
+  ]);
+  db.collection43.mapReduce(
+    function() {
+      emit(this.name, 1);
+    },
+    function(key, values) {
+      return Array.sum(values);
+    },
+    {
+      out: { inline: 1 },
+      finalize: function(key, reducedValue) {
+        return { count: reducedValue };
+      }
+    }
+  )
+```)
+题目2
+
+题目1思路：
+
+1、找到评论用户： 使用 Cypher 查询语句，匹配评论节点到用户节点的关系，统计每个用户评论过的不同商户数量。用 MATCH 和 COUNT 来实现。
+
+2、过滤用户： 在查询中添加条件，仅选择评论过不同商户数量大于 5 的用户。用 WHERE 子句进行过滤。
+
+3、获取用户信息： 使用之前筛选出的用户节点，进一步查询用户的信息，如用户名（name）、有趣指数（funny）、粉丝数量（fans）等。
+
+4、以表格形式输出： 最终结果通过 RETURN 子句指定要输出的用户信息，并在 Neo4j 中以表格形式显示然后下载导出结果为JSON格式数据。
+
+题目2思路：
+
+1、首先使用上方给出的命令行代码把数据导入到MongoDB中。
+2、使用aggregate函数依次执行group和sort操作，group操作是按照name分组，然后使用count函数统计每个name出现的次数，sort操作是按照count降序排列。
+
 == 任务小结
+#img(
+    image("assets\image-20231031144633002.png"),
+    caption: "题目4-1结果"
+)<img1>
+#img(
+    image("assets\image-20231031183544451.png"),
+    caption: "题目4-2结果"
+)<img1>
+#img(
+    image("assets\Snipaste_2023-12-06_17-03-00.png"),
+    caption: "题目4-1参考结果"
+)<img1>
+#img(
+    image("assets\Snipaste_2023-12-06_17-03-11.png"),
+    caption: "题目4-2参考结果"
+)<img1>
+经过结果参考表可知，结果正确。
 #pagebreak()
 
 = 实验任务五(不同类型数据库 MVCC 多版本并发控制对比实验)
 == 任务要求
+
+自行构造多用户同时对同一数据库对象的增删改查案例，
+实验对比 MySQL 和 MongoDB 数据库对 MVCC 多版本并发控制的支持。
+1. 体验 MySQL 在 InnoDB 存储引擎下的 MVCC 多版本并发控制，实现的事务
+ACID 特性。请注意 Mysql 需要选用什么事务隔离级来支持 MVCC？请构造
+多用户多写多读案例来展现 MVCC 并发控制特性，解释各种结果产生的原
+因。
+2. 体验 MongoDB 的 MVCC，数据集可自建或选用 yelp 数据集中的 test 集合中
+进行测试，测试方法同 MySQL。请对测试结果进行说明，并与 MySQL 的
+MVCC 实验结果进行对比分析。建议创建 MongoDB 副本或分片集群，体验
+MVCC 的不同效果（可选做其一）
+
+这里选择题目1作为典型案例，示范数据库如何实现MVCC的多版本并发支持控制。
 == 完成过程
+
+首先给出一个没有设置事务隔离级别的导致不可重复读的例子：
+#img(
+    image("assets\Snipaste_2023-12-06_17-28-16.png"),
+    caption: "事务2"
+)<img1>
+首先执行事务2，可见mrfz的值为4
+#img(
+    image("assets\Snipaste_2023-12-06_17-30-02.png"),
+    caption: "事务1"
+)<img1>
+然后执行事务1，更新mrfz的值为5
+#img(
+    image("assets\Snipaste_2023-12-06_17-31-01.png"),
+    caption: "事务2"
+)<img1>
+再次执行事务二，发现mrfz的值已经变成5了。
+
+事务2两次执行没有改变mrfz的值但是读出来的值不同，这在生产环境中会导致错误和bug的产生，因此需要使用命令行把事务隔离级别设置为可重复读（REPEATABLE READ）。
+
+以下是切换了事务隔离等级以后的情况。首先执行事务2：
+#img(
+    image("assets\Snipaste_2023-12-06_17-38-49.png"),
+    caption: "事务2"
+)<img1>
+然后执行事务1发现mrfz的值为6，然后修改mrfz的值为6.
+#img(
+    image("assets\Snipaste_2023-12-06_17-39-04.png"),
+    caption: "事务1"
+)<img1>
+最后使用事务2读取，发现mrfz的值仍然是5：
+#img(
+    image("assets\Snipaste_2023-12-06_17-40-49.png"),
+    caption: "事务2"
+)<img1>
+由此可见设置可重复读的事务隔离级别以后，事务2读取的值不会随着事务1的修改而改变，这就是MVCC的多版本并发控制。可以解决不可重复读问题。
+
+同理，写写问题就是事务2改变了某个值，而事务1又改变了这个值，因此覆盖了事务2的修改，这里可以通过对数据加锁来完成。
 == 任务小结
+
+原理：在"可重复读"事务隔离级别下，MySQL使用MVCC来处理并发事务。MVCC通过创建数据的快照视图（snapshot view）来实现事务的隔离性。每个事务在开始时会创建一个一致性的快照视图，该视图会记录事务开始时数据库中的数据状态。事务执行期间，其他事务对数据的修改不会对当前事务的查询结果产生影响。
+"可重复读"事务隔离级别确保了每个事务在整个过程中看到的数据是一致的，即使其他事务对数据进行了修改。这种隔离级别适用于多用户并发访问数据库的场景，并保证了事务的ACID特性。
+通过选择"可重复读"事务隔离级别，MySQL能够支持MVCC并发控制，保证了事务的一致性和隔离性。
+
 #pagebreak()
 
 = 课程总结
+
+本次实验通过数十个不同的题目，配置并且使用了不同种类的数据库，例如文档数据库，图数据库，关系型数据库等。
+
+通过这些题目，我对不同种类的数据库有了更深入的了解，也对数据库的使用有了更多的经验。更加了解不同数据库的适应范围和优势领域，以及为什么我们需要不同的数据库：因为大数据时代的到来，数据量越来越大，数据的类型也越来越多，适用范围单一的关系型数据库以及越来越不能满足性能和更多需求的要求了。
+
+通过大数据管理实验这门课，我对数据库领域的知识和能力都获得了提高和加强，很满意。
 #indent() 
