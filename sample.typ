@@ -89,7 +89,7 @@ JOIN user u ON ut.user_id = u.user_id;
 然后找出提出建议最多的用户ID，
 将这两个表连接以后使用JSON_MERGE_PATCH 函数将商户信息和用户信息合并为一个 JSON 文档。
 
-这里使用的JSON_MERGE_PATCH 使用函数是用于合并两个 JSON 对象的 MySQL 函数。它接受两个 JSON 参数，并返回一个新的 JSON 对象，其中包含了两个输入对象的合并结果。完美符合了题目的需求
+这里使用的JSON_MERGE_PATCH 使用函数是用于合并两个 JSON 对象的 MySQL 函数。它接受两个 JSON 参数，并返回一个新的 JSON 对象，其中包含了两个输入对象的合并结果。这道题目需要的正是返回JSON格式文档，这个函数完美符合了题目的需求。
 
 === 题目13
 #sourcecode[```sql
@@ -141,17 +141,21 @@ mysql的business表有两个个属性分别是business_id，business_info。后�
 === 题目12
 #img(
     image("assets\image-20231019201914323.png"),
-    caption: "JSON_MERGE_PATCH 函数的使用"
+    caption: "JSON_MERGE_PATCH 函数的使用的返回结果"
+)<img1>
+#img(
+    image("assets\Snipaste_2023-12-06_11-43-39.png"),
+    caption: "实验结果参考"
 )<img1>
 
 经过结果参考表可知，结果正确。
 
 === 题目13
 
-经过结果参考表可知，结果正确。但是我发现保存下来的是错误的图片，服务器又钱花完已经释放掉了，图片仅供参考。
+经过结果参考表可知，结果正确。但是我发现保存下来的是错误的图片，服务器又因为钱花完已经释放掉了，图片仅供参考。
 #img(
     image("assets\image-20231019201931204.png"),
-    caption: "Mysql-Json复杂查询"
+    caption: "Mysql-Json复杂查询的返回结果"
 )<img1>
 #pagebreak()
 = 实验任务二  ( MongoDB 实验)
@@ -191,15 +195,51 @@ mongoDB是快速上手的文档数据库，操作和web的开发语言javascript
 == 任务小结
 #img(
     image("assets\image-20231019102634646.png"),
-    caption: "aggregate的使用"
+    caption: "aggregate的使用的返回结果"
 )<img1>
-
+#img(
+    image("assets\Snipaste_2023-12-06_11-50-11.png"),
+    caption: "实验结果参考"
+)<img1>
 经过结果参考表可知，结果正确。
 #pagebreak()
 = 实验任务三  ( Neo4j 实验)
 == 任务要求
+
+在华为云远程服务器上安装并且配置Neo4j环境并且完成一系列图查询实验。
+
+neo4j是一个流行的图数据库，它的数据结构是图，图是由节点和关系组成的。neo4j的查询语言是cypher，它的语法和sql有很大的不同，但是也有很多相似的地方。cypher的查询语句是由match，where，return组成的。match用于匹配节点和关系，where用于筛选，return用于返回结果。以上就是neo4j的简要介绍
+
+Neo4j实验挑选题目10作为典型题目。下面给出详细题目和解题过程：
+
+10.查询 Allison 的朋友（直接相邻）分别有多少位朋友。(考察：使用 with 传递查询结果到后续的处理)
+
 == 完成过程
+
+首先给出实验代码：
+#sourcecode(```cypher
+MATCH(:UserNode{name:'Allison'})-[:HasFriend]->(friend)
+WITH friend.name as friendsList, 
+size((friend)-[:HasFriend]-()) as number0fFoFs
+RETURN friendsList,number0fFoFs
+```) 
+图查询的重点就是提取题目的所需节点和节点与节点之间的关系。
+
+对于这道题，首先Allison的属性是UserNode，想要查询他的朋友们就需要通过朋友这个关系来获取，因此是MATCH(:UserNode{name:'Allison'})-[:HasFriend]->(friend)。
+
+再然后，题目已经提醒我们通过with来传递查询结果到后续的处理。因此对于每个朋友，都应该使用和上一步类似的方法查询与他们存在朋友关系的节点，使用size（）聚合函数以单个Allison的朋友作为对象返回这些朋友节点的数量，加上朋友的名字，就是这道题目的答案了。
+
 == 任务小结
+
+返回结果与参考答案一致，因此结果正确。
+#img(
+    image("assets\image-20231030203541194.png"),
+    caption: "neo4j查询"
+)<img1>
+#img(
+    image("assets\Snipaste_2023-12-06_11-59-42.png"),
+    caption: "实验结果参考"
+)<img1>
 #pagebreak()
 = 实验任务四 (多数据库交互应用实验)
 == 任务要求
