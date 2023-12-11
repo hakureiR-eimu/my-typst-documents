@@ -1724,6 +1724,64 @@ promise对象意味着它可以在未来的某个时间点完成，切换状态�
 
 
 == 前端路由
+
+Vue 前端路由是一种在 Vue.js 应用中用于导航不同页面（视图）而无需重新加载整个页面的技术。这是实现单页应用（Single Page Application，简称 SPA）的关键技术之一。在传统的多页应用（MPA）中，每次页面跳转都需要从服务器加载新的页面，这会导致页面闪烁和延迟。而在 SPA 中，所有页面的内容都是在单个页面加载后通过前端路由动态更新的，这提供了更流畅和快速的用户体验。
+
+我们运用前端路由的方式是：根据路由导向不同的组件，从而实现页面中部分组件的刷新，而非重载整个网页。实现代码及分析如下：
+
+#sourcecode(```JS
+import { createRouter, createWebHistory } from "vue-router";
+const routerPath = [
+    { path: '/', redirect: { name: 'Home' } },
+    { path: '/dashboard', component: HomePage, children: [
+        { path: '/', redirect: { name: 'Home' } },
+        { path: 'home', name: 'Home', component: Home }
+      ]
+    },
+    { path: '/Post', component: HomePage, children: [
+        { path: '/', redirect: { name: 'PostPage' } },
+        { path: 'home/:id', name: 'PostPage', component: PostPage},
+        { path: 'test', name: 'test', component: test}
+      ]
+    },
+    { path: '/ReleasePost', component: HomePage, children: [
+      { path: '/', redirect: { name: 'ReleasePost' } },
+      { path: 'home', name: 'ReleasePost', component: ReleasePost }
+      ]
+    },
+    { path: '/LoginPage', component: LoginPage, children: [
+      { path: '/', name: 'LoginPage'}
+      ]
+    },
+  ];
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes: routerPath,
+  });
+
+
+```)
+
+1. 用createRouter()方法创建路由器实例。
+
+2. 定义路由规则。在 routerPath 数组中定义了一系列路由规则。每个对象都是一个路由规则，包括 path, component, redirect, children 等属性。
+
+3. 详解路由。
+  - 根路由重定向: { path: '/', redirect: { name: 'Home' } }表示当用户访问应用的根 URL (/) 时，会自动重定向到名为 Home 的路由。
+  - Dashboard 路由: { path: '/dashboard', component: HomePage, children: [...] } 表示当用户访问 /dashboard 路径时，将渲染 HomePage 组件。这个路由还定义了子路由：访问 /dashboard/ 时会重定向到 /dashboard/home，访问 /dashboard/home 时会渲染 Home 组件。
+
+
+  - Post 路由: { path: '/Post', component: HomePage, children: [...] }类似于 Dashboard 路由，这个路由定义了当访问 /Post 时，应该渲染的组件和子路由。它包括对特定帖子的路由 (/Post/home/:id) 和一个测试页面 (/Post/test)。
+
+  - ReleasePost 路由: { path: '/ReleasePost', component: HomePage, children: [...] } 这个路由定义了发布帖子的页面，当访问 /ReleasePost 时，将渲染 HomePage 组件和 ReleasePost 组件。
+
+  - LoginPage 路由: { path: '/LoginPage', component: LoginPage, children: [...] } 这个路由用于登录页面，当访问 /LoginPage 时，将渲染 LoginPage 组件。
+
+4. 创建并配置路由器。
+
+    使用 createRouter 函数创建了一个路由器实例，并通过 createWebHistory 使用了 HTML5 历史模式。然后，将之前定义的 routerPath 作为路由规则传入。
+
 == 前端页面显示
 
 页面主要分为三部分，主页，帖子详情页和登录页，Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM。因此数据和页面显示是双向绑定的,如果用户更新了View，Model的数据也自动被更新了。以下是页面的显示效果。
