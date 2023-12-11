@@ -4,12 +4,12 @@
 
 #show: project.with(
   anony: false,
-  title: " ",
+  title: "Carrot-Hole树洞",
   author: "张钧玮          马耀辉         夏彦文",
   school: "计算机学院",
   group:"OmegaXYZ",
   id: "U202115520   U202115638   U202115317",
-  mentor: "潘鹏",
+  mentor: "冯琪",
   class: "大数据 2101 班    大数据2102班",
   date: (2023, 11, 30)
 )
@@ -588,7 +588,9 @@ public class AuthController {
     @PostMapping("/register")
     public boolean register(@RequestBody Map<String,Object> idMap) throws Exception {
         try{
-            return authService.register(String.valueOf(idMap.get("userName")),String.valueOf(idMap.get("password")));
+            return authService.register(
+            String.valueOf(idMap.get("userName")),
+                          String.valueOf(idMap.get("password")));
         }catch (Exception e){
             throw new Exception("register error");
         }
@@ -597,7 +599,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResultMap login(@RequestBody Map<String,Object> idMap) throws Exception{
         try{
-            User user = authService.login(String.valueOf(idMap.get("userName")),String.valueOf(idMap.get("password")));
+            User user = authService.login(
+            String.valueOf(idMap.get("userName")),
+                          String.valueOf(idMap.get("password")));
             ResultMap resultMap = ResultMap.create();
             if(user != null){
                 resultMap.setSuccess();
@@ -665,10 +669,16 @@ public class PostController {
     @PostMapping("/publish")
     public ResultMap publishPost(@RequestBody Map<String,Object> idMap) throws Exception {
         try{
-            if(publishPostService.publishPost(String.valueOf(idMap.get("postTitle")),String.valueOf(idMap.get("postContent")),String.valueOf(idMap.get("userId")))){
-                return ResultMap.create().setSuccess().setSuccessMsg("publish success");
+            if(publishPostService.publishPost(
+            String.valueOf(
+            idMap.get("postTitle")),
+            String.valueOf(idMap.get("postContent")),
+            String.valueOf(idMap.get("userId")))){
+                return ResultMap.create().
+                setSuccess().setSuccessMsg("publish success");
             }
-            return ResultMap.create().setError().setErrorMsg("publish failed");
+            return ResultMap.create().
+                    setError().setErrorMsg("publish failed");
         }catch (Exception e){
             throw new Exception("publish post error");
         }
@@ -679,9 +689,13 @@ public class PostController {
         try{
             Post post = postService.getById(String.valueOf(idMap.get("postId")));
             if(post == null){
-                return ResultMap.create().setError().setErrorMsg("Not found");
+                return ResultMap.create().
+                setError().setErrorMsg("Not found");
             }else{
-                return ResultMap.create().setSuccess().setSuccessMsg("Success").setKeyValue("post",post);
+                return ResultMap.create().
+                setSuccess().
+                setSuccessMsg("Success").
+                setKeyValue("post",post);
             }
         }catch (Exception e){
             throw new Exception("get post error");
@@ -695,7 +709,11 @@ public class PostController {
             if(post == null){
                 return ResultMap.create().setError().setErrorMsg("Not found");
             }else{
-                return ResultMap.create().setSuccess().setSuccessMsg("Success").setKeyValue("post",post);
+                return 
+                ResultMap.create().
+                setSuccess().
+                setSuccessMsg("Success").
+                setKeyValue("post",post);
             }
         }catch (Exception e){
             throw new Exception("search post error");
@@ -706,7 +724,11 @@ public class PostController {
     public ResultMap getPostList() throws Exception{
         try{
             List<Post> postList= postService.list();
-            return ResultMap.create().setSuccess().setSuccessMsg("Success").setKeyValue("postList",postList);
+            return 
+            ResultMap.create().
+            setSuccess().
+            setSuccessMsg("Success").
+            setKeyValue("postList",postList);
         }catch (Exception e){
             throw new Exception("search post list error");
         }
@@ -716,7 +738,11 @@ public class PostController {
     public ResultMap getMyPost(@RequestBody Map<String,Object> idMap) throws Exception{
         try{
             List<Post> postList= postService.getPostByUserId(String.valueOf(idMap.get("userId")));
-            return ResultMap.create().setSuccess().setSuccessMsg("Success").setKeyValue("postList",postList);
+            return 
+            ResultMap.create().
+            setSuccess().
+            setSuccessMsg("Success").
+            setKeyValue("postList",postList);
         }catch (Exception e){
             throw new Exception("search post list error");
         }
@@ -828,7 +854,10 @@ public class CommentController {
     @PostMapping("/publish")
     public ResultMap publishComment(@RequestBody Map<String,Object> idMap) throws Exception {
         try{
-            if(commentService.publishComment(String.valueOf(idMap.get("postId")),String.valueOf(idMap.get("userId")),String.valueOf(idMap.get("commentContent")))){
+            if(commentService.
+            publishComment(String.valueOf(idMap.get("postId")),
+            String.valueOf(idMap.get("userId")),
+            String.valueOf(idMap.get("commentContent")))){
                 return ResultMap.create().setSuccess().setSuccessMsg("publish success");
             }
             return ResultMap.create().setError().setErrorMsg("publish failed");
@@ -840,8 +869,14 @@ public class CommentController {
     @PostMapping("/getPostComment")
     public ResultMap getPostComment(@RequestBody Map<String,Object> idMap) throws Exception{
         try{
-            List<Comment> commentList = commentService.getCommentsByPostId(String.valueOf(idMap.get("postId")));
-            return ResultMap.create().setSuccess().setSuccessMsg("Success").setKeyValue("postId",String.valueOf(idMap.get("postId"))).setKeyValue("commentList",commentList);
+            List<Comment> commentList = 
+            commentService.getCommentsByPostId(
+              String.valueOf(idMap.get("postId")));
+            return ResultMap.create().
+            setSuccess().
+            setSuccessMsg("Success").
+            setKeyValue("postId",String.valueOf(idMap.get("postId"))).
+            setKeyValue("commentList",commentList);
         }catch (Exception e){
             throw new Exception("get comment error");
         }
@@ -1843,7 +1878,7 @@ const router = createRouter({
 // #indent() //由于华科使用自创引用格式，基本上为 GB/T 7714 去掉[J]、[C]、[M] 等。所以需要用 show rule 来自定义格式，原理为读取自定义的 bibitems.
 // //yaml 文件再一项项渲染出来，因此要求自己维护顺序，使用时请取消 \#references() 前的注释。
 
-张钧玮：我负责前后端的交互设计开发，确保前端的请求能够得到后端的正确响应，并且数据能够顺畅地流动。我通过这个过程掌握了API的设计和优化，运用了自己对于网络请求和异步编程的深入理解，确保了用户界面的交互和后端服务的稳定性。
+张钧玮：我负责前后端的交互设计开发，确保前端的请求能够得到后端的正确响应，并且数据能够顺畅地流动。我通过这个过程掌握了API的设计和优化，运用了自己对于网络请求和异步编程的深入理解，确保了用户界面的交互和后端服务的稳定性。我在编程过程中遇到了许多问题，例如跨域问题，这是浏览器的安全性设置，同源策略（Sameoriginpolicy）是一种约定，它是浏览器最核心也最基本的安全功能，如果缺少了同源策略，则浏览器的正常功能可能都会受到影响。可以说Web是构建在同源策略基础之上的，浏览器只是针对同源策略的一种实现。同源策略会阻止一个域的javascript脚本和另外一个域的内容进行交互。所谓同源（即指在同一个域）就是两个页面具有相同的协议（protocol），主机（host）和端口号（port）。为了解决这个问题，我学习了Nginx的反向代理功能，通过配置Nginx服务器，将前端的请求转发到后端服务器，从而解决了跨域问题。通过这次项目，我对于前后端交互的设计和实现有了更深入的理解。
 
 马耀辉：我负责后端设计和开发任务，是项目中极其关键的一个部分，包括了数据库设计、服务器逻辑处理以及确保数据安全性和稳定性。通过这次项目，我深入实践了Spring Boot框架，确保了我们的论坛能够处理大量并发请求，同时维护了系统的高性能和安全性。
 
