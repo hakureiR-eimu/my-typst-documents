@@ -2,6 +2,7 @@
 .typst-preview.*.typ
 template.pdf
 sample.pdf
+*.pdf
 tmp
 *.doc
 *.docx
