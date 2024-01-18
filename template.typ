@@ -33,14 +33,14 @@
   })
 }
 
-#let image_num(_) = {
-  locate(loc => {
-    let chapt = counter(heading).at(loc).at(0)
-    let c = counter("image-chapter" + str(chapt))
-    let n = c.at(loc).at(0)
-    str(chapt) + "-" + str(n + 1)
-  })
-}
+// #let image_num(_) = {
+//   locate(loc => {
+//     let chapt = counter(heading).at(loc).at(0)
+//     let c = counter("image-chapter" + str(chapt))
+//     let n = c.at(loc).at(0)
+//     str(chapt) + "-" + str(n + 1)
+//   })
+// }
 
 
 #let equation(equation, caption: "") = {
@@ -68,8 +68,8 @@
     img,
     caption: caption,
     supplement: [图],
-    numbering: image_num,
-    kind: "image",
+    // numbering: image_num,
+    // kind: "image",
   )
 }
 
