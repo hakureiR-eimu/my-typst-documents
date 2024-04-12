@@ -381,7 +381,7 @@
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[本科生毕业设计(论文)]
+    )[操作系统课程设计]
 
     #v(40pt)
 
@@ -458,7 +458,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anony {
-        [华 中 科 技 大 学 毕 业 设 计 (论 文)]
+        [操 作 系 统 课 程 设 计]
       } else {
         [█████████████████████████]
       }
@@ -513,13 +513,7 @@
   pagebreak()
   counter(page).update(1)
 
-  // 摘要
-  zh_abstract_page(abstract_zh, keywords: keywords_zh)
 
-  pagebreak()
-
-  // abstract
-  en_abstract_page(abstract_en, keywords: keywords_en)
 
   pagebreak()
 
