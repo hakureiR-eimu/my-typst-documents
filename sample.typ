@@ -206,13 +206,256 @@ static void print_error_lines() {
 
 关于elf文件与进程函数之间的接口问题：读取elf文件的代码，找到包含调试信息的段以后，想要将其内容保存起来，有两个可以的手段。要么是用静态数组来存储debug_line段数据，那么这个数组必须足够大；也可以把debug_line直接放在程序所有需映射的段数据之后，这样可以保证有足够大的动态空间。本次挑战因为提供了方便的util函数#emph[make_addr_line]来解析.debug_line段并保存到静态数组，因此选择后者。
 
+#pagebreak()
 = 堆空间管理
 == 实验目的
 
+修改内核，使用#emph[better_malloc]替代原来pke非常简陋的#emph[malloc],使用#emph[better_free]替代原来的#emph[free]。目标正确的程序输出如下。
+
+#img(
+  image("assets/成功执行2.png", height: 20%),
+  caption: "正确的输出lab2_challenge2",
+)
+
+#sourcecode[```bash
+# usami @ CodeOfUsami in ~/workU/riscv-pke on git:lab2_challenge2_singlepageheap o [11:22:30] 
+$ spike ./obj/riscv-pke ./obj/app_singlepageheap
+In m_start, hartid:0
+HTIF is available!
+(Emulated) memory size: 2048 MB
+Enter supervisor mode...
+PKE kernel start 0x0000000080000000, PKE kernel end: 0x0000000080008000, PKE kernel size: 0x0000000000008000 .
+free physical memory address: [0x0000000080008000, 0x0000000087ffffff] 
+kernel memory manager is initializing ...
+KERN_BASE 0x0000000080000000
+physical address of _etext is: 0x0000000080005000
+kernel page table is on 
+User application is loading.
+user frame 0x0000000087fbc000, user stack 0x000000007ffff000, user kstack 0x0000000087fbb000 
+Application: ./obj/app_singlepageheap
+Application program entry point (virtual address): 0x000000000001008a
+Switch to user mode...
+hello, world!!!
+User exit with code:0.
+System is shutting down with exit code 0.
+```]
 == 实验内容
+
+为了完成实验，需要首先学习理解原先简单的#emph[malloc]和#emph[free]函数的实现，然后再实现#emph[better_malloc]和#emph[better_free]函数。
+
+以下是#emph[better_malloc]和#emph[better_free]的具体代码以及思路。
+
+#sourcecode[```C
+//
+// maybe, the simplest implementation of malloc in the world ... added @lab2_2
+//
+uint64 sys_user_allocate_page() {
+    void *pa = alloc_page();
+    uint64 va = g_ufree_page;
+    g_ufree_page += PGSIZE;
+    user_vm_map( (pagetable_t) current->pagetable, va, PGSIZE, (uint64) pa,
+                 prot_to_type( PROT_WRITE | PROT_READ, 1 ) );
+
+    return va;
+}
+```]原始的#emph[malloc]函数实现
+
+#sourcecode[```C
+// added @lab2_challenge2
+// allocate a block to user,size is n.  return virtual address
+uint64 sys_user_better_allocate_page( long n ) {
+    uint64 va = user_better_allocate( n );
+    return va;
+}
+//
+//
+//
+
+// added @lab2_challenge2
+uint64 user_better_allocate( long n ) {
+
+    // 以8为倍数向上取整
+    n = ROUNDUP( n, 8 );
+    if ( n > PGSIZE ) {
+        panic( "fail to allocate PGSIZE due to too big size.\n" );
+    }
+
+    // 遍历块链表取取到一个合适的块
+    BLOCK *cur = current->free_start, *pre = current->free_start;
+    while ( cur ) {
+        if ( cur->size >= n ) break;
+        pre = cur;
+        cur = cur->next;
+    }
+
+    // 页表耗尽则触发分页
+    if ( cur == NULL ) {
+
+        void *pa = alloc_page();
+        uint64 va = g_ufree_page;
+        g_ufree_page += PGSIZE;
+        user_vm_map( (pagetable_t) current->pagetable, va, PGSIZE, (uint64) pa,
+                     prot_to_type( PROT_WRITE | PROT_READ, 1 ) );
+        // turn this new page to a block
+        BLOCK *temp = (BLOCK *) pa;
+        temp->start = (uint64) pa + sizeof( BLOCK );
+        temp->size = PGSIZE - sizeof( BLOCK );
+        temp->va = va + sizeof( BLOCK );
+        temp->next = NULL;
+        // 插入新块
+        if ( pre == NULL ) {
+            current->free_start = temp;
+            cur = temp;
+        } else {
+            if ( pre->va + pre->size >= ( ( pre->va ) / PGSIZE + PGSIZE ) ) {
+                pre->size += PGSIZE;
+                cur = pre;
+            } else {
+                pre->next = temp;
+                cur = temp;
+            }
+        }
+    }
+
+    //分配块
+    if ( n + sizeof( BLOCK ) < cur->size ) {
+        BLOCK *to_use = (BLOCK *) ( cur->start + n );
+        to_use->start = cur->start + n + sizeof( BLOCK );
+        to_use->size = cur->size - n - sizeof( BLOCK );
+        to_use->va = cur->va + n + sizeof( BLOCK );
+        to_use->next = cur->next;
+        if ( cur == current->free_start )
+            current->free_start = to_use;
+        else
+            pre->next = to_use;
+    } else {
+        if ( cur == current->free_start )
+            current->free_start = cur->next;
+        else
+            pre->next = cur->next;
+    }
+
+    // 块置入已用链表
+    cur->size = n;
+    cur->next = current->used_start;
+    current->used_start = cur;
+    return cur->va;
+}
+```]#emph[better_malloc]函数实现
+
+原始的#emph[free]函数实现每次分配内存都会分配一个新的页，这样会导致内存资源的浪费。
+
+而#emph[better_malloc]函数接受一个参数#emph[n]作为要分配的内存大小，接下来进行以下步骤高效地分配内存。
+
+1. 首先对要分配的内存大小向上取整为8的倍数。
+
+2. 遍历块链表，找到第一个大小符合要求的空闲块。
+
+3. 如何找不到合适大小的空闲块，再分配新的物理页，并将其映射到用户虚拟地址空间，然后将其转换成一个空闲块，并插入到空闲块链表中。
+
+4. 如果找到合适大小的空闲块，将其分配给用户，并将其从空闲块链表中移除，插入到已用块链表中。
+
+第二步是完成#emph[better_free]函数的实现，以下是#emph[better_free]的具体代码以及思路。
+
+#sourcecode[```C
+
+//
+// reclaim a page, indicated by "va". added @lab2_2
+//
+uint64 sys_user_free_page( uint64 va ) {
+    user_vm_unmap( (pagetable_t) current->pagetable, va, PGSIZE, 1 );
+    return 0;
+}
+
+```]
+简单的#emph[free]函数实现
+
+#sourcecode[```C
+
+// added @lab2_challenge2
+void user_better_free( uint64 va ) {
+    // 寻找需要释放的块
+    BLOCK *cur = current->used_start, *pre = current->free_start;
+    while ( cur ) {
+        if ( cur->va <= va && cur->va + cur->size > va ) break;
+        pre = cur;
+        cur = cur->next;
+    }
+    if ( cur == NULL ) {
+        panic( "fail to find specific block.\n" );
+    }
+    if ( cur == current->used_start ) {
+        current->used_start = cur->next;
+    } else {
+        pre->next = cur->next;
+    }
+    // 将块插入到空闲链表,可以使用头节点置空操作简化逻辑
+    BLOCK *free_cur = current->free_start, *free_pre = current->used_start;
+    while ( free_cur ) {
+        if ( free_cur->va > cur->va ) {
+            break;
+        }
+        free_pre = free_cur;
+        free_cur = free_cur->next;
+    }
+    if ( free_cur == NULL ) {
+        if ( free_pre == NULL ) {
+            cur->next = current->free_start;
+            current->free_start = cur;
+        } else {
+            if ( free_pre->va + free_pre->size >= cur->va ) {
+                free_pre->size += cur->size;
+            } else
+                free_pre->next = cur, cur->next = NULL;
+        }
+    } else {
+        if ( free_cur == current->free_start ) {
+            if ( cur->va + cur->size >=
+                 free_cur->va ) 
+            {
+                cur->size += free_cur->size;
+                cur->next = free_cur->next;
+                current->free_start = cur;
+            } else {
+                cur->next = current->free_start;
+                current->free_start = cur;
+            }
+        } else { 
+            if ( free_pre->va + free_pre->size >= cur->va &&
+                 cur->va + cur->size >= free_cur->va )
+            {
+                free_pre->size += cur->size + free_cur->size;
+                free_pre->next = free_cur->next;
+            } else if ( cur->va + cur->size >=
+                        free_cur->va )
+            {
+                cur->size += free_cur->size;
+                cur->next = free_cur->next;
+                free_pre->next = cur;
+            } else if ( free_pre->va + free_pre->size >=
+                        cur->va )
+            {
+                free_pre->size += cur->size;
+            } else 
+            {
+                free_pre->next = cur;
+                cur->next = free_cur;
+            }
+        }
+    }
+
+}
+
+```]
+高效的#emph[better_free]函数实现
+
+对于简单的#emph[free]函数实现。因为分配空间时无脑分页，因此释放资源只需要调用#emph[user_vm_unmap]函数，将用户虚拟地址空间中的物理页映射取消即可。
+
+而对于challenge所实现的#emph[better_free]函数，情况复杂得多。首先需要找到要释放的块，然后将其从已用块链表中移除，再将其插入到空闲块链表中。插入时需要考虑多种情况，比如要释放的块与空闲块链表中的块相邻，需要合并；或者要释放的块与空闲块链表中的块不相邻，需要插入到合适的位置。这样就实现了正确的#emph[better_free]函数。
 == 实验调试及心得
 
-// 个人理解：typst 有两种环境，代码和内容，在代码的环境中会按代码去执行，在内容环境中会解析成普通的文本，代码环境用{}表示，内容环境用[]表示，在 content 中以 \# 开头来接上一段代码，比如\#set rule，而在花括号包裹的块中调用代码就不需要 \#。
+堆内存管理是最简单的实验。全程玩链表和哈希，不用管奇奇怪怪的指针，写好逻辑就可以。接下来叙述我在选择malloc策略的体会和心得：课上页分配内存给出了三种可行的策略：首次适应算法（选择第一个合适的连续内存块分配）；最佳适应算法（选择最小的合适内存块分配）；最差适应算法（选择最大的合适内存块分配）。观察题目要求，因为没有性能上的要求，同时要求分配的内存不出现缺页异常（也就是分配在同一页上），首次适应算法就非常合适。虽然会产生内存碎片，但是可以避免分页，既然实验要求就是不出现缺页异常，那么首次适应算法就是最好的选择。
+// 个人理解：typst 有两种环境，代码和内容，在代码的环境中会按代码去执行，在内容环境中会解析成普通的文本，代码环境用{}表示，内容环境用[]表示，在 content 中以 \# 开头来接上一段代码，比如\#set rule，而在花括号包裹的块中调用代码就不需要 \#。1
 
 
 // === 标题
