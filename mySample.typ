@@ -1,28 +1,16 @@
-#import "template.typ": *
+#import "myTemplate.typ": *
 #import "@preview/codelst:2.0.0": sourcecode
 
 
 #show: project.with(
   anonymous: false,
-  title: "基于 ChatGPT 的狗屁通文章生成器但是把标题加长到两行",
-  author: "作者",
-  abstract_zh: [
-  先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。然侍卫之臣不懈于内，忠志之士忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，恢弘志士之气，不宜妄自菲薄，引喻失义，以塞忠谏之路也。
-
-  宫中府中，俱为一体；陟罚臧否，不宜异同。若有作奸犯科及为忠善者，宜付有司论其刑赏，以昭陛下平明之理，不宜偏私，使内外异法也。
-  ],
-  abstract_en: [
-  The founding emperor passed away before his endeavor was half completed, and now the empire is divided into three parts. Yizhou is exhausted and in decline, and this is truly a critical moment of survival or destruction. However, the palace guards are tirelessly serving within, and loyal subjects are sacrificing themselves outside, all in order to repay the late emperor's kindness and show loyalty to the current emperor. It is appropriate to listen to wise advice, to honor the late emperor's virtues, to inspire the courage of loyal subjects, and not to belittle oneself or distort the truth, in order to keep the path of loyal counsel open. 
-
-  The palace and government are one entity, and punishments should be consistent. If there are those who commit crimes or show loyalty and virtue, they should be judged by the legal system to demonstrate your fairness as emperor, rather than showing partiality that would create different laws for those inside and outside the palace.
-  ],
-  keywords_zh: ("关键词1", "关键词2", "关键词3"),
-  keywords_en: ("Keyword 1", "Keyword 2", "Keyword 3"),
-  school: "复制粘贴写报告学院",
-  id: "U000114514",
-  mentor: "你的老板",
-  class: "XXXX 专业 0000 班",
-  date: (1926, 8, 17)
+  title: "114514基于 ChatGPT 的狗屁通文章生成器但是把标题加长到两行",
+  author: "张钧玮",
+  school: "计算机学院",
+  id: "U202115520",
+  mentor: "114514你的老板",
+  class: "大数据 专业 2102 班",
+  date: (114514, 8, 17)
 )
 
 

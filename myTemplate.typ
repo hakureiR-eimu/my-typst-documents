@@ -272,10 +272,6 @@
 #let project(
   anonymous: false, // 是否匿名化处理
   title: "",
-  abstract_zh: [],
-  abstract_en: [],
-  keywords_zh: (),
-  keywords_en: (),
   school: "",
   author: "",
   id: "",
@@ -451,12 +447,9 @@
     )[
       #date.at(0) 年 #date.at(1) 月 #date.at(2) 日
     ]
-    #pagebreak()
+    
   ]
 
-  // 原创性声明
-  declaration(anonymous: anonymous)
-  pagebreak()
 
   counter(page).update(0)
   // 页眉
@@ -465,7 +458,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anonymous {
-        [华 中 科 技 大 学 毕 业 设 计 (论 文)]
+        [114514 毕 业 设 计 (论 文)]
       } else {
         [█████████████████████████]
       }
@@ -520,15 +513,7 @@
   pagebreak()
   counter(page).update(1)
 
-  // 摘要
-  zh_abstract_page(abstract_zh, keywords: keywords_zh)
 
-  pagebreak()
-
-  // abstract
-  en_abstract_page(abstract_en, keywords: keywords_en)
-
-  pagebreak()
 
   // 目录
   chinese_outline()
