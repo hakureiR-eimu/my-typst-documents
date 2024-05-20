@@ -384,7 +384,7 @@
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[本科生毕业设计(论文)]
+    )[天空之城]
 
     #v(40pt)
 
@@ -458,7 +458,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anonymous {
-        [114514 毕 业 设 计 (论 文)]
+        [电影赏析]
       } else {
         [█████████████████████████]
       }
