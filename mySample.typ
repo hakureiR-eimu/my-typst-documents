@@ -14,8 +14,15 @@
 )
 
 
-= 绪论
+= 引言
 
+#pagebreak()
+= 故事概要
+
+#pagebreak()
+= 分析
+
+#pagebreak()
 // == typst 介绍
 
 

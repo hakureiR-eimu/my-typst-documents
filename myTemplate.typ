@@ -384,7 +384,7 @@
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[天空之城]
+    )[周处除三害]
 
     #v(40pt)
 
