@@ -522,19 +522,237 @@ public class PageRank {
     image("assets/rankRes.png", height: 50%),
     caption: "PageRank任务结果"
   )
+  结果符合预期，PageRank任务成功计算了PageRank值。
 == 实验小结
 
 本次实验主要内容包括：Hadoop以及HDFS的配置以及使用，以及在Hadoop环境下编写MapReduce程序，通过实验，我学会了如何在Linux环境下配置，运行并使用Hadoop运行环境以及HDFS，以及使用MapReduce的工作原理编写WordCount程序，深入理解MapReduce的工作原理并使用Hadoop框架实现PageRank算法。主要是写java和linux命令行。
 
 #pagebreak()
 = 实验2：Spark实验
+== 实验概况
 
+通过此次实验，学习如何在Linux环境下配置，运行并使用Spark运行环境，具体内容包括以下：
+1. 安装与配置Spark
+2. 使用Spark完成WordCount实验，体会Spark和MapReduce的区别
+3. 使用SparkStreaming完成实时数据处理
+
+== 实验内容
+=== 实验1: Spark安装和环境配置
+#indent()配置环境，跳过陈述
+=== 实验2: WordCount实验
+==== 任务描述
+
+编写和执行基于Spark编程模型的WordCount程序，深入理解Spark的工作原理，并学会使用Spark框架进行大规模数据处理。
+==== 实验设计
+
+1. 使用sbt管理项目依赖，搭建基于scala和spark的WordCount
+2. 编写打包WordCount程序
+3. 使用spark-submit提交到Spark引擎上运行
+
+==== 实验过程
+
+1. 搭建项目结构，下载对应依赖，对应sbt文件如下:
+#sourcecode[```sbt
+name := "WordCOunt"
+version := "1.0"
+scalaVersion := "2.11.8"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.0.0"
+```]
+#indent()对应项目结构如下：
+#sourcecode[```bash
+# usami @ CodeOfUsami in ~/workU/SparkTasks/mycode/wordcount [15:51:31]
+$ tree -I  "project|target" .
+.
+├── run.sh
+├── simple.sbt
+└── src
+    └── main
+        └── scala
+            └── WordCountApp.scala
+
+3 directories, 3 files
+```]
+2. 编写WordCount程序，调用Spark的api首先把读取到字符串按照空格分割成键值对，键为单词，值为1；然后按键分组（map），按组累加（reduce）；最后输出单词出现次数。
+具体代码如下：
+#sourcecode[```scala
+import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
+
+/** * Scala原生实现wordcount */
+object WordCountApp {
+  def main(args: Array[String]): Unit = {
+
+    val list = List("cw is cool", "wc is beautiful", "andy is beautiful", "mike is cool")
+    /** * 第一步，将list中的元素按照分隔符这里是空格拆分，然后展开 * 先map(_.split(" "))将每一个元素按照空格拆分 * 然后flatten展开 * flatmap即为上面两个步骤的整合 */
+    val res0 = list.map(_.split(" ")).flatten
+    val res1 = list.flatMap(_.split(" "))
+    println("第一步结果")
+    println(res0)
+    println(res1)
+
+    /** * 第二步是将拆分后得到的每个单词生成一个元组 * k是单词名称，v任意字符即可这里是1 */
+    val res3 = res1.map((_, 1))
+    println("第二步结果")
+    println(res3)
+    /** * 第三步是根据相同的key合并 */
+    val res4 = res3.groupBy(_._1)
+    println("第三步结果")
+    println(res4)
+    /** * 最后一步是求出groupBy后的每个key对应的value的size大小，即单词出现的个数 */
+    val res5 = res4.mapValues(_.size)
+    println("最后一步结果")
+    println(res5.toBuffer)
+  }
+}
+```]
+3. 使用#emph([/usr/local/hadoop/sbin/start-dfs.sh])启动HDFS
+4. 使用以下命令打包并提交任务：
+#sourcecode[```bash
+/usr/local/sbt/sbt package
+/usr/local/spark/bin/spark-submit --class "WordCountApp" \
+    ./target/scala-2.12/wordcount_2.12-1.0.jar
+```]
+==== 实验结果
+
+WordCount程序的结果如下：
+#sourcecode[```bash
+# usami @ CodeOfUsami in /usr/local/spark/mycode/wordcount [16:06:47] C:1
+$ /usr/local/spark/bin/spark-submit --class "WordCountApp" \
+    ./target/scala-2.12/wordcount_2.12-1.0.jar
+第一步结果
+List(cw, is, cool, wc, is, beautiful, andy, is, beautiful, mike, is, cool)
+List(cw, is, cool, wc, is, beautiful, andy, is, beautiful, mike, is, cool)
+第二步结果
+List((cw,1), (is,1), (cool,1), (wc,1), (is,1), (beautiful,1), (andy,1), (is,1), (beautiful,1), (mike,1), (is,1), (cool,1))
+第三步结果
+Map(beautiful -> List((beautiful,1), (beautiful,1)), is -> List((is,1), (is,1), (is,1), (is,1)), wc -> List((wc,1)), andy -> List((andy,1)), cool -> List((cool,1), (cool,1)), cw -> List((cw,1)), mike -> List((mike,1)))
+最后一步结果
+ArrayBuffer((beautiful,2), (is,4), (wc,1), (andy,1), (cool,2), (cw,1), (mike,1))
+24/06/05 16:07:10 INFO ShutdownHookManager: Shutdown hook called
+24/06/05 16:07:10 INFO ShutdownHookManager: Deleting directory /tmp/spark-516ee402-8e9e-4b6a-9216-637f78bb08ed
+```]
+#indent()可以看到，WordCount程序成功统计了输入的单词出现次数。
+=== 实验3: SparkStreaming实验
+==== 任务描述
+
+基于Spark Streaming编程模型实现wordcount程序，深入理解Spark Streaming的工作原理，并学会使用Spark框架进行大规模数据处理。
+
+==== 实验设计
+
+编写Spark Streaming程序的基本步骤是：
+1.创建SparkSession实例；
+2.创建DataFrame表示从数据源输入的每一行数据；
+3.DataFrame转换，类似于RDD转换操作；
+4.创建StreamingQuery开启流查询；
+5.调用StreamingQuery.awaitTermination()方法，等待流查询结束。
+
+==== 实验过程
+
+1. 构建项目，编写基于streaming的WordCount程序，代码如下：
+ #sourcecode[```scala
+ import org.apache.spark.sql.functions._
+import org.apache.spark.sql.SparkSession
+
+object WordCountStructuredStreaming{
+def main(args: Array[String]){
+val spark = SparkSession.builder.appName("StructuredNetworkWordCount").getOrCreate()
+import spark.implicits._
+val lines = spark.readStream.format("socket").option("host","localhost").option("port",9998).load()
+
+
+val words = lines.as[String].flatMap(_.split(" "))
+val wordCounts = words.groupBy("value").count()
+
+
+val query = wordCounts.writeStream.outputMode("complete").format("console").start()
+query.awaitTermination()
+}
+}
+ ```]
+2. 使用#emph([nc])命令检测9998端口，当spark执行任务时输入数据
+3. 编写打包WordCount程序，使用spark-submit提交到Spark引擎上运行。然后执行流处理
+
+==== 实验结果
+
+输入数据流以后结果如下：
+#sourcecode[```bash
+-------------------------------------------
+Batch: 1
+-------------------------------------------
+24/06/05 16:20:13 INFO CodeGenerator: Code generated in 6.354354 ms
+24/06/05 16:20:13 INFO CodeGenerator: Code generated in 8.980403 ms
++-----------+-----+
+|      value|count|
++-----------+-----+
+|      hello|    1|
+|    beijing|    1|
+|world,hello|    1|
++-----------+-----+
+```]
+#indent()可以正确的统计输入的单词出现次数。
 #pagebreak()
-= 实验3：
+= 实验3：图计算任务
+== 实验概况
+因为没有n卡和cuda资源，使用spark和graphX替代实现SCC(最大连通图)算法
+== 实验内容
+使用Tarjan算法得到SCC的基本原理和逻辑如下：
+#sourcecode[```bash
+// 入参为顶点集，边集，图 出参为强连通分量子图
+vertices[],edges[],graph -> sccGraph
+1. 初始化顶点数组键值对，每个点索引标记为-1
+2. 任选一个顶点，初始化其起点索引为0，深度优先搜索，以时间戳标记每个点，即每次访问一个点，其index值加1。具体逻辑实现是实现一个栈，每次访问点都入栈，直到遍历完成再检查栈。如果栈顶元素的index值大于当前点的index值，说明栈顶元素在当前点的子树中，将栈顶元素出栈，直到栈顶元素的index值小于当前点的index值，将栈顶元素出栈，将出栈的元素加入到一个集合中，这个集合就是一个强连通分量。
+3. 重复第二步直到所有顶点都被遍历过，此时就获得了所有连通分量子图的数组，返回最大图即可。
+```]
 
+具体代码如下:
+#sourcecode[```scala
+import org.apache.spark._
+import org.apache.spark.graphx._
+import org.apache.spark.rdd.RDD
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    val sparkConf = new SparkConf().setAppName("GraphX SCC Example").setMaster("local[*]")
+    val sc = new SparkContext(sparkConf)
+
+    // 定义顶点和边
+    val vertices: RDD[(VertexId, String)] = sc.parallelize(Seq(
+      (1L, "A"), (2L, "B"), (3L, "C"), (4L, "D"), (5L, "E")
+    ))
+
+    val edges: RDD[Edge[Int]] = sc.parallelize(Seq(
+      Edge(1L, 2L, 0), Edge(2L, 3L, 0), Edge(3L, 1L, 0),
+      Edge(3L, 4L, 0), Edge(4L, 5L, 0), Edge(5L, 4L, 0)
+    ))
+
+    
+    val graph = Graph(vertices, edges)
+
+    
+    val sccGraph = graph.stronglyConnectedComponents(5).vertices
+
+    sccGraph.collect.foreach(println)
+
+    sc.stop()
+  }
+}
+
+```]
+== 实验结果
+
+结果命令行输出如下：
+#sourcecode[```bash
+24/06/05 16:37:52 INFO DAGScheduler: Job 56 finished: collect at Main.scala:27, took 0.018973 s
+(1,1)
+(2,1)
+(3,1)
+(4,4)
+(5,4)
+```]符合预期，得到了最大连通图的结果。
 #pagebreak()
 = 实验总结
 
+本次实验，通过Hadoop和Spark的实验，了解了分布式环境下的大数据系统如何处理数据以及其中蕴含的设计思路，例如流处理，图处理等等。Spark引擎调调api就可以省去繁忙的算法编写任务，同时兼顾考虑了分布式环境可能出现的种种问题，体现了软件工程高内聚低耦合的设计思想：一层一层传递数据，但是上层不需要考虑下层的种种分布式问题，因为底层被封装在引擎背后。因此只需要符合引擎规则的代码和数据，就可以在复杂分布式环境下面也可以得到正确的结果
 #pagebreak()
 // == typst 介绍
 
