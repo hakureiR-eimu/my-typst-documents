@@ -14,8 +14,528 @@
 )
 
 
-= 绪论
+= 实验1：MapReduce实验
 
+== 实验概况
+
+通过本实验，学习如何在Linux环境下配置，运行并使用Hadoop运行环境以及HDFS，具体内容包括以下：
+1. 安装与配置Hadoop
+2. 配置、启动与使用HDFS
+3. 使用MapReduce的工作原理编写WordCount程序
+4. 深入理解MapReduce的工作原理并使用Hadoop框架实现PageRank算法
+
+== 实验内容
+
+=== 实验1&&实验2 
+
+配置Hadoop&&HDFS环境，本质是下面实验的前置铺垫，跳过陈述
+
+=== 实验3：WordCount程序
+
+==== 任务描述
+
+#indent()编写并执行基于MapReduce编程模型的WordCount程序，在分布式环境（HDFS）中运行它们
+
+==== 实验设计
+
+#indent()项目结构如下：
+#sourcecode[```bash
+# usami @ CodeOfUsami in ~/workU/HadoopTask/WordCount [13:04:26]
+$ tree .
+.
+├── WordCount$IntSumReducer.class
+├── WordCount$TokenizerMapper.class
+├── WordCount.class
+├── WordCount.jar
+├── WordCount.java
+└── input
+    └── WordCount
+        ├── file0
+        └── file1
+
+2 directories, 7 files
+```]
+
+#indent()项目结构解释：
+  1. WordCount.java是编写的WordCount程序
+  2. 使用javac编译WordCount.java生成WordCount.class，然后打包成WordCount.jar
+  3. 在input文件夹下存放两个文件file0和file1，这两个文件是WordCount程序的输入文件。程序将会对input文件夹下面所有文件进行单词统计。
+==== 实验过程
+  1. 搭建项目结构
+  2. 编写WordCount代码并使用javac编译打包，编写的代码如下：
+#sourcecode[```java
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+
+public class WordCount {
+    public WordCount() {}
+
+    public static void main( String[] args ) throws Exception {
+        // 设置 Hadoop Configuration
+        Configuration conf = new Configuration();
+
+        // 使用 GenericOptionsParser 获取命令行参数
+        String[] otherArgs =
+            ( new GenericOptionsParser( conf, args ) ).getRemainingArgs();
+
+        // 如果输入参数个数 <2 则返回错误提示
+        if ( otherArgs.length < 2 ) {
+            System.err.println( "Usage: wordcount <in> [<in>...] <out>" );
+            System.exit( 2 );
+        }
+
+        // 设置 Hadoop Job
+        Job job = Job.getInstance( conf, "word count" );
+        job.setJarByClass( WordCount.class );
+        job.setMapperClass( WordCount.TokenizerMapper.class );
+        job.setCombinerClass( WordCount.IntSumReducer.class );
+        job.setReducerClass( WordCount.IntSumReducer.class );
+        job.setOutputKeyClass( Text.class );
+        job.setOutputValueClass( IntWritable.class );
+
+        // 添加输入文件
+        for ( int i = 0; i < otherArgs.length - 1; ++i ) {
+            FileInputFormat.addInputPath( job, new Path( otherArgs[ i ] ) );
+        }
+
+        // 设置输出文件
+        FileOutputFormat.setOutputPath(
+            job, new Path( otherArgs[ otherArgs.length - 1 ] ) );
+        // 提交任务并等待任务完成，如果成功则返回0，反之则返回1
+        System.exit( job.waitForCompletion( true ) ? 0 : 1 );
+    }
+
+    // 定义 SumReducer 用于计算每个单词出现的总次数
+    public static class IntSumReducer
+        extends Reducer<Text, IntWritable, Text, IntWritable> {
+        private IntWritable result = new IntWritable();
+
+        public IntSumReducer() {}
+
+        public void reduce(
+            Text key, Iterable<IntWritable> values,
+            Reducer<Text, IntWritable, Text, IntWritable>.Context context )
+            throws IOException, InterruptedException {
+            int sum = 0;
+
+            // 遍历所有IntWritable，求和得到单词的总出现次数
+            IntWritable val;
+            for ( Iterator i$ = values.iterator(); i$.hasNext();
+                  sum += val.get() ) {
+                val = (IntWritable) i$.next();
+            }
+
+            // 写入结果
+            this.result.set( sum );
+            context.write( key, this.result );
+        }
+    }
+
+    // 定义 TokenizerMapper
+    // 用于将每行文本切分为单词，并输出每个单词及其出现次数（在该行文 本中）
+    public static class TokenizerMapper
+        extends Mapper<Object, Text, Text, IntWritable> {
+        private static final IntWritable one = new IntWritable( 1 );
+        private Text word = new Text();
+
+        public TokenizerMapper() {}
+
+        public void
+            map( Object key, Text value,
+                 Mapper<Object, Text, Text, IntWritable>.Context context )
+                throws IOException, InterruptedException {
+            StringTokenizer itr = new StringTokenizer( value.toString() );
+
+            // 当还有更多单词时，继续获取下一个单词并输出
+            while ( itr.hasMoreTokens() ) {
+                this.word.set( itr.nextToken() );
+                context.write( this.word, one );
+            }
+        }
+    }
+}
+```]
+  3. 使用#emph(text(blue)[hadoop fs -put])命令将input文件夹上传到HDFS的#emph(text(blue)[input/WordCount])目录下。
+  4. 使用#emph(text(blue)[/usr/local/hadoop/bin/hadoop jar WordCount.jar org/apache/hadoop/examples/WordCount input/WordCount output/WordCount])命令运行WordCount程序。
+  5. 使用#emph([hadoop dfs -get])得到结果文件。
+==== 实验结果
+#indent()HDFS系统中的output文件夹结果如下：
+#sourcecode[
+  ```
+# usami @ CodeOfUsami in ~/workU/HadoopTask/WordCount [13:26:15]
+$ hdfs dfs -ls output
+2024-06-05 13:26:26,371 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Found 1 items
+drwxr-xr-x   - usami supergroup          0 2024-06-05 13:26 output/WordCount
+  ```
+]
+#indent()使用#emph[hdfs dfs -get output ./output]把文件下载到本地查看，结果如下：
+#sourcecode[
+  ```
+  # usami @ CodeOfUsami in ~/workU/HadoopTask/WordCount/output/WordCount [13:29:10]
+  $ ls
+  _SUCCESS  part-r-00000
+
+  # usami @ CodeOfUsami in ~/workU/HadoopTask/WordCount/output/WordCount [13:29:10]
+  $ cat part-r-00000
+  echo    1
+  game    1
+  of      1
+  rainbow 1
+  the     2
+  waiting 1
+  ```
+]
+#indent()可以看到，WordCount程序成功统计了input文件夹下的两个文件中的单词出现次数。
+
+#pagebreak()
+=== 实验4：PageRank算法
+==== 任务描述
+
+编写和执行基于MapReduce编程模型的PageRank程序，使用HDFS作为分布式存储环境
+
+=== 实验设计
+
+#indent()项目结构如下：
+#sourcecode[```bash
+# usami @ CodeOfUsami in ~/workU/HadoopTask [13:33:25]
+$ tree PageRank
+PageRank
+├── Format
+│   ├── Format$FormatCombiner.class
+│   ├── Format$FormatMapper.class
+│   ├── Format$FormatReducer.class
+│   ├── Format.class
+│   ├── Format.jar
+│   └── Format.java
+├── PageRank
+│   ├── PageRank$PageCounter.class
+│   ├── PageRank$PageRankMapper.class
+│   ├── PageRank$PageRankReducer.class
+│   ├── PageRank.class
+│   ├── PageRank.jar
+│   └── PageRank.java
+├── input
+│   └── PageRank
+│       └── web-Stanford.txt
+
+```]
+
+#indent()实验设计两个MapReduce任务，第一个任务用于格式化输入文件，第二个任务用于迭代计算PageRank值。
+
+对于格式化任务，设计MapReduce工作流。Map任务是处理输入数据，将每行文本拆分成节点对，并记录所有出现的节点。Reduce任务计算每个节点的初始PageRank值#emph([（1.0 / NODES.size()）])，并生成最终输出,持久化保存到output/format下面。
+
+对于迭代计算任务，设计MapReduce工作流，旨在反复根据顶点的rank值以及所有入度的rank值迭代计算新的rank值直到顶点rank值收敛。Map类的主要功能是处理输入数据，保存顶点信息到内存上下文。Reducer类的主要功能是汇总来自Mapper的输入，计算每个页面的新rank，并判断收敛情况。
+
+
+
+==== 实验过程
+
+编译，打包，提交任务，查看结果的过程与第二个实验类似，这里不再赘述。
+
+格式化任务的代码如下：
+#sourcecode[```java
+// 导入 Java 和 Hadoop 相关的库
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import javax.xml.soap.Node;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+
+public class Format {
+    public static Set<String> NODES = new HashSet<String>();
+
+    public Format() {}
+
+    public static void main( String[] args ) throws Exception {
+        // 设置 Hadoop Configuration
+        Configuration conf = new Configuration();
+
+        // 使用 GenericOptionsParser 获取命令行参数
+        String[] otherArgs =
+            ( new GenericOptionsParser( conf, args ) ).getRemainingArgs();
+
+        // 如果输入参数个数 <2 则返回错误提示
+        if ( otherArgs.length < 2 ) {
+            System.err.println( "Usage: wordcount <in> [<in>...] <out>" );
+            System.exit( 2 );
+        }
+
+        // 设置 Hadoop Job
+        Job job = Job.getInstance( conf, "" );
+        job.setJarByClass( Format.class );
+        job.setMapperClass( FormatMapper.class );
+        job.setCombinerClass( FormatCombiner.class );
+        job.setReducerClass( FormatReducer.class );
+        job.setOutputKeyClass( Text.class );
+        job.setOutputValueClass( Text.class );
+
+        // 添加输入文件
+        for ( int i = 0; i < otherArgs.length - 1; ++i ) {
+            FileInputFormat.addInputPath( job, new Path( otherArgs[ i ] ) );
+        }
+
+        // 设置输出文件
+        FileOutputFormat.setOutputPath(
+            job, new Path( otherArgs[ otherArgs.length - 1 ] ) );
+
+        // 提交任务并等待任务完成，如果成功则返回0，反之则返回1
+        System.exit( job.waitForCompletion( true ) ? 0 : 1 );
+    }
+
+    public static class FormatReducer extends Reducer<Text, Text, Text, Text> {
+        private Text result = new Text();
+
+        public FormatReducer() {}
+
+        public void reduce( Text key, Iterable<Text> values,
+                            Reducer<Text, Text, Text, Text>.Context context )
+            throws IOException, InterruptedException {
+            StringBuilder links = new StringBuilder();
+
+            double rank = 1.0 / NODES.size();
+            links.append( rank );
+            for ( Text value : values ) {
+                links.append( " " ).append( value.toString() );
+            }
+
+            // 写入结果
+            this.result.set( links.toString().trim() );
+            context.write( key, this.result );
+        }
+    }
+
+    public static class FormatCombiner extends Reducer<Text, Text, Text, Text> {
+        private Text result = new Text();
+
+        public FormatCombiner() {}
+
+        public void reduce( Text key, Iterable<Text> values,
+                            Reducer<Text, Text, Text, Text>.Context context )
+            throws IOException, InterruptedException {
+            StringBuilder links = new StringBuilder();
+
+            for ( Text value : values ) {
+                links.append( " " ).append( value.toString() );
+            }
+
+            // 写入结果
+            this.result.set( links.toString().trim() );
+            context.write( key, this.result );
+        }
+    }
+
+    public static class FormatMapper extends Mapper<Object, Text, Text, Text> {
+        private Text nodaA = new Text();
+        private Text nodaB = new Text();
+
+        public FormatMapper() {}
+
+        public void map( Object key, Text value,
+                         Mapper<Object, Text, Text, Text>.Context context )
+            throws IOException, InterruptedException {
+            StringTokenizer itr = new StringTokenizer( value.toString() );
+
+            this.nodaA.set( itr.nextToken() );
+            NODES.add( this.nodaA.toString() );
+            this.nodaB.set( itr.nextToken() );
+            NODES.add( this.nodaB.toString() );
+
+            context.write( this.nodaA, this.nodaB );
+        }
+    }
+}
+```]
+
+#indent()PageRank代码如下:
+#sourcecode[```java
+// 导入 Java 和 Hadoop 相关的库
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.mapreduce.Counters;
+
+import java.io.IOException;
+import java.util.Objects;
+
+import static java.lang.Math.abs;
+
+public class PageRank {
+    public PageRank() {
+    }
+
+    public static enum PageCounter {
+        Converge,
+        Total
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 设置 Hadoop Configuration
+        Configuration conf = new Configuration();
+
+        // 使用 GenericOptionsParser 获取命令行参数
+        String[] otherArgs = (new GenericOptionsParser(conf, args)).getRemainingArgs();
+
+        // 如果输入参数个数 <2 则返回错误提示
+        if (otherArgs.length < 2) {
+            System.err.println("Usage: wordcount <in> [<in>...] <out>");
+            System.exit(2);
+        }
+        String inpath = otherArgs[0];
+        String outpath = otherArgs[1] + "/iter";
+        for (int i = 0; i < 50; i++) {
+            // 设置 Hadoop Job
+            Job job = Job.getInstance(conf, "");
+            job.setJarByClass(PageRank.class);
+            job.setMapperClass(PageRankMapper.class);
+            job.setReducerClass(PageRankReducer.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+            // 添加输入文件
+            FileInputFormat.addInputPath(job, new Path(inpath));
+            // 设置输出文件
+            FileOutputFormat.setOutputPath(job, new Path(outpath + i));
+            // 下轮输入文件
+            inpath = outpath + i;
+            job.waitForCompletion(true);
+
+            Counters counters = job.getCounters();
+            long totalpage = counters.findCounter(PageCounter.Total).getValue();// 获取计数值
+            long convergepage = counters.findCounter(PageCounter.Converge).getValue(); //收敛计数值
+            System.out.println("total page: " + totalpage);
+            System.out.println("converge page: " + convergepage);
+            if ((double) convergepage / totalpage >= 0.99) {
+                System.out.println("converge at iteration: " + i);
+                break;
+            }
+        }
+    }
+
+
+    public static class PageRankReducer extends Reducer<Text, Text, Text, Text> {
+
+        public PageRankReducer() {
+        }
+
+        public void reduce(Text key, Iterable<Text> values, Reducer<Text, Text, Text, Text>.Context context) throws IOException, InterruptedException {
+            StringBuffer links = new StringBuffer();
+            double newRank = 0.0, preRank = 0.0;
+
+            for (Text value : values) {
+
+                String content = value.toString();
+
+                if (content.startsWith("|")) {
+                    // if this value contains node links append them to the 'links' string
+                    // for future use: this is needed to reconstruct the Formatinput for Job#2 mapper
+                    // in case of multiple iterations of it.
+                    links.append(content.substring(1));
+                } else if (content.startsWith("#")) {
+
+                    double in_rank = Double.parseDouble(content.trim().substring(1));
+
+                    newRank += in_rank;
+                } else if (content.startsWith("&")) {
+                    preRank = Double.parseDouble(content.trim().substring(1));
+                }
+
+            }
+
+            newRank = 0.85 * newRank + 0.15 * 3.547319468043973e-6;
+            context.write(key, new Text(newRank + " " + links));
+
+            if (abs(newRank - preRank) <= 1E-8)        //枚举计数器，计算有几个已收敛
+                context.getCounter(PageCounter.Converge).increment(1);
+        }
+    }
+
+
+    public static class PageRankMapper extends Mapper<Object, Text, Text, Text> {
+
+        public PageRankMapper() {
+        }
+
+        public void map(Object key, Text value, Mapper<Object, Text, Text, Text>.Context context) throws IOException, InterruptedException {
+            int idx1 = value.find("\t");
+            int idx2 = value.find(" ");
+
+            String page = Text.decode(value.getBytes(), 0, idx1);
+            String rank = Text.decode(value.getBytes(), idx1 + 1, idx2 - idx1 - 1);
+            String links = Text.decode(value.getBytes(), idx2 + 1, value.getLength() - (idx2 + 1));
+
+            String[] allOtherPages = links.split(" ");
+            int outs = allOtherPages.length;
+            for (String otherPage : allOtherPages) {
+                if (Objects.equals(otherPage, ""))
+                    continue;
+                StringBuffer out = new StringBuffer("#");
+                out.append(Double.parseDouble(rank) / outs);
+                Text outPageRank = new Text(out.toString());
+                context.write(new Text(otherPage), outPageRank);
+            }
+
+            context.write(new Text(page), new Text("&" + rank));
+            // put the original links so the reducer is able to produce the correct output
+            context.write(new Text(page), new Text("|" + links));
+
+            context.getCounter(PageCounter.Total).increment(1);
+        }
+    }
+}
+```]
+4. 实验结果
+  1. 格式化任务的结果如下：
+  #img(
+    image("assets/formatRes.png", height: 50%),
+    caption: "格式化任务结果"
+  )
+  2. PageRank任务的结果如下：
+  #img(
+    image("assets/rankRes.png", height: 50%),
+    caption: "PageRank任务结果"
+  )
+== 实验小结
+
+本次实验主要内容包括：Hadoop以及HDFS的配置以及使用，以及在Hadoop环境下编写MapReduce程序，通过实验，我学会了如何在Linux环境下配置，运行并使用Hadoop运行环境以及HDFS，以及使用MapReduce的工作原理编写WordCount程序，深入理解MapReduce的工作原理并使用Hadoop框架实现PageRank算法。主要是写java和linux命令行。
+
+#pagebreak()
+= 实验2：Spark实验
+
+#pagebreak()
+= 实验3：
+
+#pagebreak()
+= 实验总结
+
+#pagebreak()
 // == typst 介绍
 
 
