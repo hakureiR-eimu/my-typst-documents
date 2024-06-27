@@ -4,18 +4,102 @@
 
 #show: project.with(
   anonymous: false,
-  title: "114514基于 ChatGPT 的狗屁通文章生成器但是把标题加长到两行",
+  title: "大数据算法实践",
   author: "张钧玮",
   school: "计算机学院",
   id: "U202115520",
-  mentor: "114514你的老板",
+  mentor: "刘海坤",
   class: "大数据 专业 2102 班",
-  date: (114514, 8, 17)
+  date: (2024, 6, 25)
 )
 
 
-= 绪论
+= 实验
 
+大规模图数据中三角形计数算法的设计与性能优化
+
+== 实验目的
+
+本实验旨在通过⼤规模图数据中三⻆形计数算法的设计与性能优化，帮助深⼊理解图计算系统的⼯作原理和性能优化机制，并学会使⽤图计算框架进⾏⼤规模图数据分析和处理。通过此实验，学⽣将能够掌握图计算的基本概念、编写⽐较复杂的图算法程序并进⾏性能调优。
+== 实验内容
+
+本实验要求在给定服务器平台，以及数据集上实现三⻆形计数（Triangle Counting，TC）算法，调试并获得最⾼的性能。
+
+== 程序设计
+
+使用Spark GraphX框架实现三⻆形计数算法。在大图上，因为数据集较大会产生内存溢出，gc调度密集，进程被杀死等问题，因此对于大图，使用以下优化技术：
+1. 顶点划分：将图划分为多个⼦图，每个⼦图包含⼀部分顶点和相应的边。每个⼦图在⼀个独⽴的进程中运⾏，并且⼦图之间的通信通过消息传递进⾏。
+2. 持久化：将图数据持久化到磁盘，以减少内存占⽤。
+3. 增加spark.executor.memory和spark.driver.memory参数，以增加内存使⽤。
+4. 增加并行度：增加spark.default.parallelism参数，以增加并⾏度。
+5. 优化gc策略：使用G1GC垃圾回收器，以减少gc时间。
+
+== 实验过程
+
+1. #emph([/usr/local/hadoop/sbin/start-dfs.sh ])  开启hadoop集群
+2. #emph([/usr/local/sbt/sbt package])    编译打包项目
+3. #emph([hdfs dfs -put ./input/\* input/TriangleCounting/  ])    上传数据集
+4. #emph([/usr/local/spark/bin/spark-submit \
+    --conf spark.executor.extraJavaOptions=-XX:+UseG1GC --conf spark.driver.extraJavaOptions=-XX:+UseG1GC \
+    --conf spark.default.parallelism=200 \
+    --executor-memory 50G \
+    --driver-memory 50G \
+    --class "TriangleCounting" \
+    /home/usami/workU/BigDataSystem/SparkTasks/TriangleCounting/target/scala-2.12/trianglecounting_2.12-1.0.jar \
+    2>&1
+ ])     运行程序
+
+=== 问题出现
+
+默认参数下运行有以下问题：
+1. 运行速度慢
+2. 内存溢出
+3. gc调度密集
+报错如下图：
+#img(
+  image("assets/Snipaste_2024-06-27_11-09-45.png", height: 20%),
+  caption: "运行报错"
+)
+
+=== 问题分析
+
+使用以下办法依次解决问题：
+1. 开启多线程核心吃满
+2. 增加spark.executor.memory和spark.driver.memory参数，以增加内存使⽤
+3. 增加并行度：增加spark.default.parallelism参数，以增加并⾏度
+4. 优化gc策略：使用G1GC垃圾回收器，以减少gc时间
+
+== 实验结果与分析
+
+#sourcecode[```bash
+[data] Total triangles count: 3830604
+[data] Time taken: 4304 ms
+```]使用多线程结果
+#img(
+  image("assets/Snipaste_2024-06-27_11-13-29.png", height: 20%),
+  caption: "cpu调度图"
+)
+可以看到cpu核心被充分利用，运行速度明显提升，内存溢出问题得到解决，gc调度密集问题也得到解决。
+
+== 心得体会
+
+这个课不错，可惜实习缘故没有时间好好写。没有好好用上以下的并行编程知识。
+大学的并行编程我主要学了以下的内容：
+1. omp的循环展开，这个真的很方便，如果是互不干扰的循环进程比如矩阵乘法用omp库可以自动把核心吃满
+2. 异步编程，c\#,js，c++都有的异步组件。async/await，解决了进程阻塞的问题，避免了轮询造成的cpu浪费，把一个异步问题转换成状态迁移，是常用的编程模型，降低心智负担，👍
+3. 多线程编程，c++的std::thread。因为如果没有并发冲突与omp无异，而假如有并发冲突，可以使用std::mutex来实现进程同步
+
+= 附录：实验目录结构
+
+#sourcecode[```bash
+# usami @ CodeOfUsami in ~/workU/BigDataSystem/SparkTasks/TriangleCounting on git:main o [11:15:43] 
+$ git ls-files
+.gitignore
+README.md
+build.sbt
+run.sh
+src/main/scala/TriangleCounting.scala
+```]
 // == typst 介绍
 
 
