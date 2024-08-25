@@ -458,7 +458,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anonymous {
-        [大数据算法实践]
+        [生产实习]
       } else {
         [█████████████████████████]
       }
