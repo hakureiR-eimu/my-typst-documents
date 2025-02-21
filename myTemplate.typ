@@ -228,7 +228,7 @@
 }
 
 // 中文摘要
-#let zh_abstract_page(abstract, keywords: ()) = {
+#let zh_abstract_page(abstract) = {
   set heading(level: 1, numbering: none)
   show <_zh_abstract_>: {
     align(center)[
@@ -240,12 +240,7 @@
   set text(font: songti, size: 12pt)
 
   abstract
-  par(first-line-indent: 0em)[
-    #text(weight: "bold", font: heiti, size: 12pt)[
-      关键词：
-      #keywords.join("；")
-    ]
-  ]
+
 }
 
 // 英文摘要
@@ -278,6 +273,7 @@
   mentor: "",
   class: "",
   date: (1926, 8, 17),
+  abstract_zh: [],
   body,
 ) = {
   // 引用的时候，图表公式等的 numbering 会有错误，所以用引用 element 手动查
@@ -384,7 +380,7 @@
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[本科生毕业设计(论文)]
+    )[文献翻译]
 
     #v(40pt)
 
@@ -458,7 +454,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anonymous {
-        [114514 毕 业 设 计 (论 文)]
+        [文献翻译]
       } else {
         [█████████████████████████]
       }
@@ -513,10 +509,12 @@
   pagebreak()
   counter(page).update(1)
 
-
-
+  
   // 目录
   chinese_outline()
+  pagebreak()
+
+  zh_abstract_page(abstract_zh)
 
   // 正文的页脚
   
