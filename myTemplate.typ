@@ -378,13 +378,13 @@
     }
     #image(logo_path, width: 55%, height: 7%)
 
-    #v(40pt)
+    #v(20pt)
 
     #text(
       size: 36pt,
       font: zhongsong,
       weight: "bold"
-    )[本科生毕业设计(论文)]
+    )[本科生毕业设计(论文)开题报告]
 
     #v(40pt)
 
@@ -458,7 +458,7 @@
       set text(font: songti, 10pt, baseline: 8pt, spacing: 3pt)
       set align(center)
       if not anonymous {
-        [114514 毕 业 设 计 (论 文)]
+        [ 毕 业 设 计 (论 文) 开 题 报 告]
       } else {
         [█████████████████████████]
       }
